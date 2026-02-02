@@ -1,0 +1,87 @@
+# Dependencies
+node_modules
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# Build outputs
+# Note: .next/standalone will be created during build inside container
+.next
+out
+build
+dist
+.vercel
+
+# Environment files
+.env
+.env.local
+.env*.local
+env
+env.example
+
+# IDE and editors
+.vscode
+.idea
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Git
+.git
+.gitignore
+.gitattributes
+
+# Documentation (not needed in production)
+docs
+*.md
+!README.md
+
+# Updates folder (not needed in production)
+updates
+
+# Zip files
+*.zip
+*.tar
+*.tar.gz
+
+# Test files
+coverage
+.nyc_output
+__tests__
+*.test.ts
+*.test.tsx
+*.spec.ts
+*.spec.tsx
+
+# Prisma generated (will be regenerated)
+node_modules/.prisma
+
+# Logs
+*.log
+logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Temporary files
+tmp
+temp
+.cache
+.turbo
+
+# OS files
+Thumbs.db
+.DS_Store
+
+# TypeScript
+*.tsbuildinfo
+next-env.d.ts
+
+# Cloud
+.cloud
+/.cloud
+
+# Misc
+.eslintcache

@@ -1,0 +1,813 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ==================== Authentication Models ====================
+
+model Role {
+  id          String   @id @default(cuid())
+  name        String   @unique  // e.g. admin, accountant, inventory_manager
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  users            User[]
+  rolePermissions  RolePermission[]
+}
+
+model Permission {
+  id       String   @id @default(cuid())
+  key      String   @unique  // e.g. invoices.read, inventory.write, products.write
+  name     String
+  category String?  // for UI grouping
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  rolePermissions RolePermission[]
+}
+
+model RolePermission {
+  id           String   @id @default(cuid())
+  roleId       String
+  permissionId String
+  createdAt    DateTime @default(now())
+
+  role       Role       @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  permission Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+
+  @@unique([roleId, permissionId])
+  @@index([roleId])
+  @@index([permissionId])
+}
+
+model User {
+  id           String    @id @default(cuid())
+  phone        String?   @unique  // for OTP login
+  email        String?   @unique  // for password login / contact
+  username     String?   @unique  // for password login identifier
+  passwordHash String?   // for password login
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  roleId   String?
+  role     Role?    @relation(fields: [roleId], references: [id], onDelete: SetNull)
+
+  sessions     Session[]
+  smsCodes     SmsCode[]
+  customers    Customer[]
+}
+
+model SmsCode {
+  id        String   @id @default(cuid())
+  phone     String
+  codeHash  String
+  expiresAt DateTime
+  attempts  Int      @default(0)
+  used      Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  user   User?  @relation(fields: [userId], references: [id])
+  userId String?
+
+  @@index([phone])
+  @@unique([phone])
+}
+
+model Session {
+  id          String   @id @default(cuid())
+  user        User     @relation(fields: [userId], references: [id])
+  userId      String
+  refreshToken String?
+  userAgent   String?
+  ip          String?
+  expiresAt   DateTime
+  createdAt   DateTime @default(now())
+
+  @@index([userId])
+}
+
+// ==================== Core Business Models ====================
+
+model Customer {
+  id               String            @id @default(cuid())
+  firstName        String
+  lastName         String
+  phone            String?
+  email            String?
+  favoriteProducts String[]          @default([])
+  preferences      Json?             // { productType, colors, quality, priceRange }
+  lastSuggestedProduct String?
+  lastPurchaseDate DateTime?
+  totalPurchases   Int               @default(0)
+  manualDebtBalance Float            @default(0)
+
+  userId String
+  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  sales             Sale[]
+  messages          Message[]
+  debts             Debt[]
+  visits            Visit[]
+  socialInteractions SocialInteraction[]
+  purchases         Purchase[]
+  interests         CustomerInterest?
+  orders            Order[]
+  addresses         Address[]
+  cart              Cart?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([phone])
+  @@index([email])
+  @@index([userId])
+  @@index([lastPurchaseDate])
+}
+
+model Product {
+  id              String        @id @default(cuid())
+  name            String
+  color           String?
+  originalPrice   Float
+  discountedPrice Float?
+  finalPrice      Float
+  category        String?
+  stock           Int           @default(0)
+  description     String?       @db.Text
+  images          String[]      @default([])
+  slug            String?       @unique
+  priceType       String        @default("fixed") // 'fixed' | 'call_for_price' | 'negotiable'
+  featured        Boolean       @default(false)
+  seoTitle        String?
+  seoDescription  String?       @db.Text
+
+  saleItems       SaleItem[]
+  inventoryItems  Inventory[]
+  purchases       Purchase[]
+  priceChanges    PriceChange[]
+  seasonalPredictions SeasonalPrediction[]
+  orderItems      OrderItem[]
+  cartItems       CartItem[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([category])
+  @@index([name])
+  @@index([slug])
+  @@index([featured])
+  @@index([priceType])
+}
+
+model Sale {
+  id          String     @id @default(cuid())
+  customerId  String
+  customerName String?
+  amount      Float
+  date        DateTime
+  month       Int
+  year        Int
+
+  customer   Customer   @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  items      SaleItem[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([customerId])
+  @@index([date])
+  @@index([month, year])
+}
+
+model SaleItem {
+  id          String  @id @default(cuid())
+  saleId      String
+  productId   String
+  productName String
+  quantity    Int
+  unitPrice   Float
+
+  sale    Sale    @relation(fields: [saleId], references: [id], onDelete: Cascade)
+  product Product @relation(fields: [productId], references: [id])
+
+  @@index([saleId])
+  @@index([productId])
+}
+
+model Purchase {
+  id          String   @id @default(cuid())
+  productId   String
+  productName String
+  quantity    Int
+  unitPrice   Float
+  totalAmount Float
+  purchaseDate DateTime
+  supplier    String?
+
+  customerId String?
+  customer   Customer? @relation(fields: [customerId], references: [id], onDelete: SetNull)
+  product    Product   @relation(fields: [productId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([productId])
+  @@index([purchaseDate])
+  @@index([customerId])
+}
+
+model Inventory {
+  id           String    @id @default(cuid())
+  productId    String
+  productName  String
+  quantity     Int
+  purchaseDate DateTime?
+  purchasePrice Float?
+
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([productId])
+  @@unique([productId])
+}
+
+model Debt {
+  id          String   @id @default(cuid())
+  customerId  String?
+  customerName String?
+  amount      Float
+  dueDate     DateTime
+  status      String   @default("pending") // 'paid' | 'pending'
+  checkNumber String?
+  bank        String?
+  receiveDate DateTime?
+  paidDate    DateTime?
+  type        String?  // 'received' | 'paid'
+  description String?  @db.Text
+  accountNumber String?
+
+  customer Customer? @relation(fields: [customerId], references: [id], onDelete: SetNull)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([customerId])
+  @@index([dueDate])
+  @@index([status])
+}
+
+// ==================== Messaging Models ====================
+
+model Message {
+  id             String   @id @default(cuid())
+  customerId     String
+  customerName   String
+  content        String   @db.Text
+  platform       String   // 'telegram' | 'whatsapp' | 'rubika' | 'instagram'
+  sentAt         DateTime
+  status         String   @default("pending") // 'sent' | 'failed' | 'pending'
+  productId      String?
+  templateId     String?
+  isAutomated    Boolean  @default(false)
+  automationRunId String?
+
+  customer Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+
+  @@index([customerId])
+  @@index([platform])
+  @@index([sentAt])
+  @@index([status])
+  @@index([automationRunId])
+}
+
+model MessageTemplate {
+  id        String   @id @default(cuid())
+  name      String
+  content   String   @db.Text
+  variables String[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([name])
+}
+
+// ==================== Banking Models ====================
+
+model BankAccount {
+  id             String            @id @default(cuid())
+  accountNumber  String
+  bankName       String
+  accountType    String            // 'current' | 'savings' | 'other'
+  initialBalance Float             @default(0)
+  currentBalance Float             @default(0)
+
+  transactions   BankTransaction[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([accountNumber])
+  @@unique([accountNumber])
+}
+
+model BankTransaction {
+  id              String    @id @default(cuid())
+  rowNumber       Int
+  date            DateTime
+  accountId       String
+  accountNumber   String
+  type            String    // 'received' | 'paid'
+  checkNumber     String?
+  paidCheckNumber String?
+  description     String?   @db.Text
+  debit           Float?
+  credit          Float?
+  balance         Float
+  manualRemaining Float?
+  customerId      String?
+  customerName    String?
+  bank            String?
+  dueDate         DateTime?
+  status          String?   // 'pending' | 'paid'
+
+  account BankAccount @relation(fields: [accountId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([accountId])
+  @@index([date])
+  @@index([type])
+  @@index([status])
+}
+
+// ==================== Gold Price Models ====================
+
+model GoldPrice {
+  id              String           @id @default(cuid())
+  price           Float
+  change          Float
+  changePercent   Float
+  lastUpdate      DateTime
+  trend           String           // 'up' | 'down' | 'stable'
+  yearlyHighest   Float
+  yearlyHighestDate DateTime
+
+  history         GoldPriceHistory[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model GoldPriceHistory {
+  id           String    @id @default(cuid())
+  goldPriceId  String
+  date         DateTime
+  price        Float
+  change       Float
+  changePercent Float
+
+  goldPrice GoldPrice @relation(fields: [goldPriceId], references: [id], onDelete: Cascade)
+
+  @@index([goldPriceId])
+  @@index([date])
+}
+
+model PriceChange {
+  id        String   @id @default(cuid())
+  productId String
+  date      DateTime
+  price     Float
+  reason    String   // 'gold_price_increase' | 'manual' | 'discount'
+
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@index([productId])
+  @@index([date])
+}
+
+// ==================== Pricing Models ====================
+
+model PriceUpdateLog {
+  id               String                @id @default(cuid())
+  date             DateTime
+  variable         String                // 'gold' | 'usd' | 'eur' | 'custom'
+  previousPrice    Float
+  newPrice         Float
+  productsAffected Int
+  totalPriceIncrease Float
+  status           String                @default("pending") // 'pending' | 'approved' | 'rejected' | 'completed'
+
+  productUpdates   ProductPriceUpdate[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([date])
+  @@index([status])
+}
+
+model ProductPriceUpdate {
+  id                String         @id @default(cuid())
+  priceUpdateLogId  String
+  productId         String
+  productName       String
+  previousPrice     Float
+  newPrice          Float
+  priceIncrease     Float
+  priceIncreasePercent Float
+
+  priceUpdateLog PriceUpdateLog @relation(fields: [priceUpdateLogId], references: [id], onDelete: Cascade)
+
+  @@index([priceUpdateLogId])
+  @@index([productId])
+}
+
+// ==================== Analytics Models ====================
+
+model CustomerInterest {
+  id          String  @id @default(cuid())
+  customerId  String  @unique
+  productTypes Json   // { type: string; score: number }[]
+  colors      Json    // { color: string; score: number }[]
+  quality     Json    // { level: string; score: number }[]
+  priceRange  Json    // { min, max, average }
+
+  customer Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model SeasonalPrediction {
+  id                String   @id @default(cuid())
+  productId         String
+  productName       String
+  season            String   // 'spring' | 'summer' | 'fall' | 'winter'
+  predictedSales    Int
+  recommendationDate DateTime
+  reason            String   @db.Text
+  priority          String   // 'high' | 'medium' | 'low'
+  status            String   @default("pending") // 'pending' | 'approved' | 'rejected'
+  confidence        Int?     // 0-100
+
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([productId])
+  @@index([season])
+  @@index([status])
+  @@index([recommendationDate])
+}
+
+model Visit {
+  id        String   @id @default(cuid())
+  customerId String
+  source    String   // 'website' | 'instagram' | 'telegram' | 'whatsapp' | 'other'
+  url       String?
+  timestamp DateTime
+  duration  Int?     // in seconds
+
+  customer Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+
+  @@index([customerId])
+  @@index([timestamp])
+  @@index([source])
+}
+
+model SocialInteraction {
+  id         String   @id @default(cuid())
+  customerId String
+  platform   String   // 'instagram' | 'telegram' | 'whatsapp'
+  type       String   // 'like' | 'comment' | 'share' | 'view'
+  contentId  String?
+  timestamp  DateTime
+
+  customer Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+
+  @@index([customerId])
+  @@index([platform])
+  @@index([timestamp])
+}
+
+// ==================== Content Models ====================
+
+model Content {
+  id                String   @id @default(cuid())
+  type              String   // 'image' | 'video' | 'audio'
+  url               String
+  originalCaption   String?  @db.Text
+  aiEnhancedCaption String?  @db.Text
+  publishedAt       DateTime?
+  platforms         String[] @default([])
+  status            String   @default("draft") // 'draft' | 'published' | 'scheduled'
+  scheduledDate     DateTime?
+  views             Int?     @default(0)
+  likes             Int?     @default(0)
+  comments          Int?     @default(0)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([status])
+  @@index([publishedAt])
+  @@index([type])
+}
+
+model AutomatedMessageRun {
+  id             String   @id @default(cuid())
+  scheduledAt    DateTime
+  executedAt     DateTime?
+  status         String   @default("pending") // 'pending' | 'running' | 'completed' | 'failed'
+  frequency      String   // 'daily' | 'weekly' | 'monthly'
+  totalCustomers Int      @default(0)
+  sentMessages   Int      @default(0)
+  failedMessages Int      @default(0)
+  successRate    Float    @default(0)
+  messages       String[] @default([]) // Array of message IDs
+  error          String?  @db.Text
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([status])
+  @@index([scheduledAt])
+}
+
+// ==================== Maps Scraper Models ====================
+
+model MapsScrapeTarget {
+  id         String    @id @default(cuid())
+  keyword    String
+  city       String
+  radius     Int?      // in kilometers
+  radiusType String?   // 'km' | 'city'
+  priority   String    // 'high' | 'medium' | 'low'
+  status     String    @default("pending") // 'pending' | 'running' | 'completed' | 'failed'
+  totalFound Int?
+  createdAt  DateTime  @default(now())
+  completedAt DateTime?
+
+  businesses ScrapedBusiness[]
+  runs       MapsScrapeRun[]
+
+  @@index([status])
+  @@index([priority])
+  @@index([createdAt])
+}
+
+model ScrapedBusiness {
+  id            String    @id @default(cuid())
+  scrapeTargetId String
+  name          String
+  phone         String?
+  address       String?   @db.Text
+  rating        Float?
+  reviews       Int?
+  website       String?
+  googleMapsUrl String?   @db.Text
+  latitude      Float?
+  longitude     Float?
+  category      String?
+  scrapedAt     DateTime  @default(now())
+  status        String    @default("new") // 'new' | 'contacted' | 'converted' | 'ignored'
+  notes         String?   @db.Text
+
+  target MapsScrapeTarget @relation(fields: [scrapeTargetId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([scrapeTargetId])
+  @@index([status])
+  @@index([name])
+}
+
+model MapsScrapeRun {
+  id            String   @id @default(cuid())
+  targetId      String
+  startedAt     DateTime
+  completedAt   DateTime?
+  status        String   @default("pending") // 'pending' | 'running' | 'completed' | 'failed'
+  totalFound    Int      @default(0)
+  businessesScraped String[] @default([]) // Array of ScrapedBusiness IDs
+  error         String?  @db.Text
+  progress      Int?     // 0-100
+
+  target MapsScrapeTarget @relation(fields: [targetId], references: [id], onDelete: Cascade)
+
+  @@index([targetId])
+  @@index([status])
+}
+
+// ==================== Settings Models ====================
+
+model BusinessSettings {
+  id                        String   @id @default(cuid())
+  businessName              String?
+  contactPhone              String
+  telegramChannel           String
+  rubikaChannel             String
+  whatsappNumber            String
+  instagramPage             String
+  address                   String?  @db.Text
+  goldPriceIncreasePercent  Float?
+  discountPercent           Float?
+  discountDurationHours     Int?
+  pricingVariable           String?  // 'gold' | 'usd' | 'eur' | 'custom'
+  priceIncreasePercent      Float?
+  autoPriceUpdateEnabled    Boolean  @default(false)
+  autoPriceUpdateTime       String?
+  automatedMessaging        Json?    // AutomatedMessagingSettings
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([id])
+}
+
+model IntegrationSettings {
+  id                      String   @id @default(cuid())
+  googleCloudClientId     String?
+  googleCloudClientSecret String?  @db.Text
+  n8nWebhookUrl           String?  @db.Text
+  geminiApiKey            String?  @db.Text
+  openAiApiKey            String?  @db.Text
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([id])
+}
+
+// ==================== E-commerce Models ====================
+
+model Order {
+  id              String      @id @default(cuid())
+  orderNumber     String      @unique
+  customerId      String?
+  customerName    String
+  customerPhone   String
+  customerEmail   String?
+  totalAmount     Float
+  status          String      @default("pending") // 'pending' | 'processing' | 'completed' | 'cancelled'
+  paymentMethod   String      // 'online' | 'phone' | 'manual' | 'cash_on_delivery'
+  paymentStatus   String      @default("pending") // 'pending' | 'paid' | 'failed'
+  shippingAddress Json?
+  notes           String?     @db.Text
+
+  customer Customer? @relation(fields: [customerId], references: [id], onDelete: SetNull)
+  items    OrderItem[]
+  payments Payment[]
+  invoice  Invoice?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([customerId])
+  @@index([orderNumber])
+  @@index([status])
+  @@index([paymentStatus])
+  @@index([createdAt])
+}
+
+model Invoice {
+  id            String   @id @default(cuid())
+  invoiceNumber String   @unique  // e.g. INV-1403-00001
+  orderId       String   @unique
+  issuedAt      DateTime @default(now())
+  totalAmount   Float
+  tax           Float?   @default(0)
+  discount      Float?   @default(0)
+  status        String   @default("issued")  // issued | cancelled
+
+  order Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([orderId])
+  @@index([invoiceNumber])
+  @@index([issuedAt])
+}
+
+model OrderItem {
+  id          String  @id @default(cuid())
+  orderId     String
+  productId   String
+  productName String
+  quantity    Int
+  unitPrice   Float
+
+  order   Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product Product @relation(fields: [productId], references: [id])
+
+  @@index([orderId])
+  @@index([productId])
+}
+
+model Payment {
+  id            String   @id @default(cuid())
+  orderId       String
+  amount        Float
+  method        String   // 'online' | 'phone' | 'manual' | 'cash'
+  status        String   @default("pending") // 'pending' | 'completed' | 'failed'
+  transactionId String?
+  gateway       String?  // 'zarinpal' | 'idpay' | 'pep' | etc.
+  paidAt        DateTime?
+  notes         String?  @db.Text
+
+  order Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([orderId])
+  @@index([status])
+  @@index([transactionId])
+}
+
+model Cart {
+  id        String     @id @default(cuid())
+  sessionId String     @unique
+  customerId String?   @unique
+  items     CartItem[]
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+
+  customer Customer? @relation(fields: [customerId], references: [id], onDelete: SetNull)
+
+  @@index([sessionId])
+}
+
+model CartItem {
+  id        String @id @default(cuid())
+  cartId    String
+  productId String
+  quantity  Int
+
+  cart    Cart    @relation(fields: [cartId], references: [id], onDelete: Cascade)
+  product Product @relation(fields: [productId], references: [id])
+
+  @@index([cartId])
+  @@index([productId])
+}
+
+model BlogPost {
+  id              String   @id @default(cuid())
+  title           String
+  slug            String   @unique
+  content         String   @db.Text
+  excerpt         String?  @db.Text
+  featuredImage   String?
+  metaTitle       String?
+  metaDescription String?  @db.Text
+  metaKeywords    String[] @default([])
+  category        String?
+  tags            String[] @default([])
+  author          String?
+  published       Boolean  @default(false)
+  publishedAt     DateTime?
+  views           Int      @default(0)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([slug])
+  @@index([published])
+  @@index([publishedAt])
+  @@index([category])
+}
+
+model Address {
+  id          String   @id @default(cuid())
+  customerId  String
+  title       String?  // 'home' | 'work' | 'other'
+  firstName   String
+  lastName    String
+  phone       String
+  address     String   @db.Text
+  city        String
+  province    String
+  postalCode  String?
+  isDefault   Boolean  @default(false)
+
+  customer Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([customerId])
+}
+
+

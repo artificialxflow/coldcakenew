@@ -1,0 +1,48 @@
+{
+  "name": "coldcake.ir",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "node scripts/build-with-logs.js",
+    "build:simple": "next build",
+    "start": "node scripts/start-with-logs.js",
+    "start:simple": "next start",
+    "prebuild": "node scripts/pre-build-check.js",
+    "postinstall": "node scripts/postinstall-check.js || true",
+    "prestart": "node scripts/init.js || true",
+    "kill-port": "node scripts/kill-port.js",
+    "lint": "eslint",
+    "prisma:generate": "prisma generate",
+    "prisma:migrate": "prisma migrate dev",
+    "prisma:deploy": "prisma migrate deploy",
+    "prisma:seed": "tsx prisma/seed.ts"
+  },
+  "dependencies": {
+    "@heroicons/react": "^2.2.0",
+    "@prisma/client": "^6.4.0",
+    "@tailwindcss/postcss": "^4",
+    "bcryptjs": "^2.4.3",
+    "jalaali-js": "^1.2.8",
+    "jsonwebtoken": "^9.0.2",
+    "jspdf": "^3.0.4",
+    "jspdf-autotable": "^5.0.2",
+    "next": "16.0.10",
+    "react": "19.2.1",
+    "react-dom": "19.2.1",
+    "recharts": "^3.6.0",
+    "tailwindcss": "^4",
+    "xlsx": "^0.18.5"
+  },
+  "devDependencies": {
+    "@types/bcryptjs": "^2.4.6",
+    "@types/jsonwebtoken": "^9.0.6",
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "eslint": "^9",
+    "eslint-config-next": "16.0.10",
+    "prisma": "^6.4.0",
+    "typescript": "^5"
+  }
+}
