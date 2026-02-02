@@ -1,0 +1,13 @@
+# Nixpacks config for Coolify / Git deploy (Next.js standalone)
+# این فایل برای دیپلوی از ریپو گیت با Nixpacks استفاده می‌شود.
+
+[phases.build]
+cmds = ["npm run build"]
+
+[start]
+# Next.js standalone: سرور از پوشه standalone اجرا می‌شود
+# PORT و HOSTNAME را در Coolify (Environment Variables) تنظیم کنید، مثلاً PORT=3001 و HOSTNAME=0.0.0.0
+cmd = "cd .next/standalone && node server.js"
+
+[variables]
+HOSTNAME = "0.0.0.0"

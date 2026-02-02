@@ -224,6 +224,44 @@ node scripts/health-check.js
 - `/api/health` endpoint پاسخ می‌دهد
 - Database connection برقرار است
 
+## دیپلوی با Coolify (Git + Nixpacks)
+
+اگر از **Coolify** و اتصال به **Git** استفاده می‌کنید، پروژه با **Nixpacks** بیلد می‌شود (بدون Dockerfile دستی).
+
+### فایل `nixpacks.toml`
+
+در ریشهٔ پروژه فایل `nixpacks.toml` وجود دارد که:
+- **Build:** `npm run build` (خروجی standalone)
+- **Start:** `cd .next/standalone && node server.js`
+- **HOSTNAME:** `0.0.0.0` برای گوش دادن روی همه اینترفیس‌ها در کانتینر
+
+### Environment Variables در Coolify
+
+- `PORT=3001` (یا همان پورتی که در Network تنظیم کرده‌اید)
+- `HOSTNAME=0.0.0.0`
+- `DATABASE_URL` و `JWT_SECRET` و بقیهٔ متغیرها طبق `env.example`
+
+### Network در Coolify
+
+- **Ports Exposes** و **Port Mappings** را با همان مقدار `PORT` (مثلاً ۳۰۰۱) یکسان کنید تا PORT mismatch نشود.
+
+---
+
+## خطای ChunkLoadError / 404 برای فایل‌های `_next/static/chunks`
+
+**علائم:** صفحه خطا می‌دهد با پیام «Loading chunk ... failed» و در کنسول مرورگر خطای 404 برای یک فایل `.js` داخل `_next/static/chunks`.
+
+**علت:** معمولاً کش مرورگر یا CDN؛ HTML قدیمی هنوز اسم چانک بیلد قبلی را دارد ولی روی سرور بیلد جدید با نام چانک دیگری است.
+
+**راه‌حل:**
+1. **Hard Refresh:** `Ctrl+Shift+R` (ویندوز) یا `Cmd+Shift+R` (مک)
+2. **پاک کردن کش سایت:** در DevTools → Application → Storage → Clear site data برای دامنه
+3. **حالت ناشناس:** یک بار همان آدرس را در پنجره Incognito/Private باز کنید
+
+بعد از هر Redeploy اگر کاربران چنین خطایی دیدند، یک بار رفرش سخت یا پاک کردن کش کافی است.
+
+---
+
 ## نکات
 
 - همیشه لاگ‌ها را قبل از report کردن مشکل بررسی کنید

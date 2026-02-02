@@ -57,7 +57,9 @@ console.log('📋 [DEPLOY] Step 3: Generating Prisma Client');
 try {
   console.log('🔧 [DEPLOY] Running: npx prisma generate');
   execSync('npx prisma generate', {
-    stdio: 'inherit',
+    encoding: 'utf8',
+    stdio: 'pipe',
+    maxBuffer: 10 * 1024 * 1024,
     cwd: projectRoot,
     env: process.env
   });
@@ -65,6 +67,8 @@ try {
 } catch (error) {
   console.error('❌ [DEPLOY] Failed to generate Prisma Client');
   console.error('❌ [DEPLOY] Error:', error.message);
+  if (error.stdout) console.error('❌ [DEPLOY] Prisma stdout:', error.stdout);
+  if (error.stderr) console.error('❌ [DEPLOY] Prisma stderr:', error.stderr);
   process.exit(1);
 }
 
@@ -88,7 +92,8 @@ try {
     cwd: projectRoot,
     env: {
       ...process.env,
-      NODE_ENV: 'production'
+      NODE_ENV: 'production',
+      NODE_OPTIONS: process.env.NODE_OPTIONS || '--max-old-space-size=2048'
     }
   });
   const buildTime = ((Date.now() - startTime) / 1000).toFixed(2);
@@ -114,6 +119,12 @@ if (fs.existsSync(nextBuildPath)) {
   console.error('❌ [DEPLOY] .next directory not found - build may have failed');
   process.exit(1);
 }
+
+// #region agent log
+const standaloneServerPath = path.join(projectRoot, '.next', 'standalone', 'server.js');
+const standaloneExists = fs.existsSync(standaloneServerPath);
+fetch('http://127.0.0.1:7248/ingest/5c26e490-151e-4b3c-9e76-6a9569d3ce00',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'scripts/build-with-logs.js:Step6',message:'Standalone output check',data:{standaloneExists,standaloneServerPath,cwd:process.cwd(),projectRoot},timestamp:Date.now(),sessionId:'debug-session',runId:'build',hypothesisId:'H1'})}).catch(()=>{});
+// #endregion
 
 console.log('');
 console.log('✅ [DEPLOY] Build process completed successfully!');
