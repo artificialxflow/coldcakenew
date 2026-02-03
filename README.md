@@ -220,6 +220,31 @@ TABANSMS_PATTERN_VAR=OTP
 
 ---
 
+## 7.3 تنظیم دقیق کامندها در Coolify (بدون کوتیشن)
+
+اگر فیلدهای **Install / Build / Start Command** فعال هستند، **دقیقاً** این مقدارها را بدون کوتیشن وارد کن:
+
+- **Install Command**
+```
+npm install
+```
+
+- **Build Command**
+```
+npm run build
+```
+
+- **Start Command**
+```
+cd .next/standalone && node server.js
+```
+
+> **نکته مهم:**  
+> مقدارها را **بدون کوتیشن** وارد کن (نه `'...'` و نه `"..."`).  
+> اگر از **Nixpacks** استفاده می‌کنی و `nixpacks.toml` داری، می‌توانی این فیلدها را خالی بگذاری تا خود Nixpacks استفاده کند.
+
+---
+
 ## 8. مایگریت دیتابیس در Production (خودکار)
 
 بعد از اولین دیپلوی روی سرور Production باید مایگریشن‌ها را اعمال کنی. دو روش:
@@ -243,6 +268,51 @@ npm run prisma:deploy
 ```
 
 به این ترتیب هر بار که دیپلوی جدید موفق شود، مایگریشن‌ها هم اتوماتیک روی دیتابیس Production اعمال می‌شوند.
+
+---
+
+## 8.1 دیپلوی با Dockerfile (بدون Nixpacks)
+
+اگر ترجیح می‌دهی **به‌جای Nixpacks** از Dockerfile استفاده کنی، فایل‌های زیر آماده شده‌اند:
+
+- `Dockerfile` (بیلد و اجرای `next start`)
+- `docker-compose.yml` (اپ + PostgreSQL)
+- `.dockerignore`
+
+### 8.1.1 اجرای اپ فقط با Docker
+
+در ریشه پروژه:
+
+```bash
+docker build -t coldcake-app .
+docker run --name coldcake-app -p 3000:3000 \
+  -e NODE_ENV=production \
+  -e PORT=3000 \
+  -e HOSTNAME=0.0.0.0 \
+  -e DATABASE_URL=postgresql://<user>:<pass>@<host>:5432/<db_name> \
+  -e JWT_SECRET=<production-secret> \
+  -e NEXT_PUBLIC_SITE_URL=http://localhost:3000 \
+  -e TABANSMS_BASE_URL=https://edge.ippanel.com/v1 \
+  -e TABANSMS_API_KEY=<real-api-key> \
+  -e TABANSMS_SENDER_NUMBER=<service-number> \
+  -e TABANSMS_PATTERN_CODE=<pattern-code> \
+  -e TABANSMS_PATTERN_VAR=OTP \
+  coldcake-app
+```
+
+> مقدارها را **بدون کوتیشن** وارد کن.
+
+### 8.1.2 اجرای اپ + دیتابیس با Docker Compose
+
+```bash
+docker compose up -d --build
+```
+
+بعد از بالا آمدن کانتینرها، یک بار مایگریشن Production را اجرا کن:
+
+```bash
+docker compose exec app npx prisma migrate deploy
+```
 
 ---
 
