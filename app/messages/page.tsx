@@ -117,27 +117,15 @@ export default function MessagesPage(props?: { noLayout?: boolean }) {
       return;
     }
 
-    // #region agent log
-    fetch('http://127.0.0.1:7243/ingest/e77c6a33-0990-4e85-b79e-b1f96db37185',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'app/messages/page.tsx:113',message:'handleAddCustomer called',data:{firstName:formData.firstName,lastName:formData.lastName,phone:formData.phone,email:formData.email},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
-    // #endregion
-
     try {
       setIsSaving(true);
       const requestBody = JSON.stringify(formData);
-      
-      // #region agent log
-      fetch('http://127.0.0.1:7243/ingest/e77c6a33-0990-4e85-b79e-b1f96db37185',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'app/messages/page.tsx:123',message:'Before fetch request',data:{requestBody},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
-      // #endregion
       
       const res = await fetch('/api/customers', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: requestBody,
       });
-
-      // #region agent log
-      fetch('http://127.0.0.1:7243/ingest/e77c6a33-0990-4e85-b79e-b1f96db37185',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'app/messages/page.tsx:132',message:'Fetch response received',data:{status:res.status,statusText:res.statusText,ok:res.ok},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
-      // #endregion
 
       if (res.ok) {
         showToast('مشتری با موفقیت اضافه شد', 'success');
@@ -146,18 +134,9 @@ export default function MessagesPage(props?: { noLayout?: boolean }) {
         loadData();
       } else {
         const error = await res.json();
-        
-        // #region agent log
-        fetch('http://127.0.0.1:7243/ingest/e77c6a33-0990-4e85-b79e-b1f96db37185',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'app/messages/page.tsx:141',message:'Error response received',data:{errorMessage:error?.message,errorCode:error?.error,fullError:JSON.stringify(error)},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'D'})}).catch(()=>{});
-        // #endregion
-        
         showToast(error.message || 'خطا در افزودن مشتری', 'error');
       }
     } catch (error) {
-      // #region agent log
-      fetch('http://127.0.0.1:7243/ingest/e77c6a33-0990-4e85-b79e-b1f96db37185',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'app/messages/page.tsx:147',message:'Exception in handleAddCustomer',data:{errorMessage:error instanceof Error ? error.message : String(error)},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'D'})}).catch(()=>{});
-      // #endregion
-      
       showToast('خطا در افزودن مشتری', 'error');
     } finally {
       setIsSaving(false);

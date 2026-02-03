@@ -120,12 +120,6 @@ if (fs.existsSync(nextBuildPath)) {
   process.exit(1);
 }
 
-// #region agent log
-const standaloneServerPath = path.join(projectRoot, '.next', 'standalone', 'server.js');
-const standaloneExists = fs.existsSync(standaloneServerPath);
-fetch('http://127.0.0.1:7248/ingest/5c26e490-151e-4b3c-9e76-6a9569d3ce00',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'scripts/build-with-logs.js:Step6',message:'Standalone output check',data:{standaloneExists,standaloneServerPath,cwd:process.cwd(),projectRoot},timestamp:Date.now(),sessionId:'debug-session',runId:'build',hypothesisId:'H1'})}).catch(()=>{});
-// #endregion
-
 console.log('');
 console.log('✅ [DEPLOY] Build process completed successfully!');
 console.log('⏰ [DEPLOY] Final timestamp:', new Date().toISOString());

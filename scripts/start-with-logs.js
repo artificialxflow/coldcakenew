@@ -170,10 +170,6 @@ function startNextJs(port) {
   console.log(`🌐 [DEPLOY] PORT: ${port}`);
   console.log('');
 
-  // #region agent log
-  fetch('http://127.0.0.1:7262/ingest/60585c9d-40fa-40a1-b59b-bcde38dab411',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'scripts/start-with-logs.js:147',message:'Starting Next.js process',data:{port,nodeEnv:process.env.NODE_ENV || 'production',hasDbUrl:!!process.env.DATABASE_URL,hasJwtSecret:!!process.env.JWT_SECRET},timestamp:Date.now(),sessionId:'deploy-debug',runId:'start',hypothesisId:'nextjs-start'})}).catch(()=>{});
-  // #endregion
-
   let serverStarted = false;
   let serverStartTime = Date.now();
 
@@ -192,10 +188,6 @@ function startNextJs(port) {
   nextProcess.stdout.on('data', (data) => {
     const output = data.toString();
     process.stdout.write(output); // Forward to parent stdout
-    
-    // #region agent log
-    fetch('http://127.0.0.1:7262/ingest/60585c9d-40fa-40a1-b59b-bcde38dab411',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'scripts/start-with-logs.js:166',message:'Next.js stdout',data:{output:output.substring(0,500)},timestamp:Date.now(),sessionId:'deploy-debug',runId:'start',hypothesisId:'nextjs-stdout'})}).catch(()=>{});
-    // #endregion
 
     // Check for server ready messages
     if (output.includes('Ready on') || output.includes('started server') || output.includes(`Local:`) || output.includes('started')) {
@@ -203,23 +195,14 @@ function startNextJs(port) {
         serverStarted = true;
         const startupTime = ((Date.now() - serverStartTime) / 1000).toFixed(2);
         console.log(`✅ [DEPLOY] Next.js server started successfully in ${startupTime}s`);
-        // #region agent log
-        fetch('http://127.0.0.1:7262/ingest/60585c9d-40fa-40a1-b59b-bcde38dab411',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'scripts/start-with-logs.js:182',message:'Next.js server confirmed started',data:{startupTime,port},timestamp:Date.now(),sessionId:'deploy-debug',runId:'start',hypothesisId:'server-ready'})}).catch(()=>{});
-        // #endregion
         
         // Verify port is actually listening
         setTimeout(() => {
           verifyPortListening(port).then(isListening => {
             if (isListening) {
               console.log(`✅ [DEPLOY] Port ${port} is confirmed listening and accepting connections`);
-              // #region agent log
-              fetch('http://127.0.0.1:7262/ingest/60585c9d-40fa-40a1-b59b-bcde38dab411',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'scripts/start-with-logs.js:190',message:'Port verification successful',data:{port},timestamp:Date.now(),sessionId:'deploy-debug',runId:'start',hypothesisId:'port-verify'})}).catch(()=>{});
-              // #endregion
             } else {
               console.error(`❌ [DEPLOY] Port ${port} is NOT accepting connections`);
-              // #region agent log
-              fetch('http://127.0.0.1:7262/ingest/60585c9d-40fa-40a1-b59b-bcde38dab411',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'scripts/start-with-logs.js:195',message:'Port verification failed',data:{port},timestamp:Date.now(),sessionId:'deploy-debug',runId:'start',hypothesisId:'port-verify-fail'})}).catch(()=>{});
-              // #endregion
             }
           });
         }, 2000); // Wait 2 seconds after "ready" message
@@ -229,9 +212,6 @@ function startNextJs(port) {
     // Check for WebSocket errors
     if (output.includes('no close frame') || output.includes('WebSocket') || output.includes('Error On Connecting')) {
       console.error('❌ [DEPLOY] WebSocket connection error detected');
-      // #region agent log
-      fetch('http://127.0.0.1:7262/ingest/60585c9d-40fa-40a1-b59b-bcde38dab411',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'scripts/start-with-logs.js:183',message:'WebSocket error detected',data:{output:output.substring(0,500)},timestamp:Date.now(),sessionId:'deploy-debug',runId:'start',hypothesisId:'websocket-error'})}).catch(()=>{});
-      // #endregion
     }
   });
 
@@ -239,10 +219,6 @@ function startNextJs(port) {
   nextProcess.stderr.on('data', (data) => {
     const output = data.toString();
     process.stderr.write(output); // Forward to parent stderr
-    
-    // #region agent log
-    fetch('http://127.0.0.1:7262/ingest/60585c9d-40fa-40a1-b59b-bcde38dab411',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'scripts/start-with-logs.js:192',message:'Next.js stderr',data:{output:output.substring(0,500)},timestamp:Date.now(),sessionId:'deploy-debug',runId:'start',hypothesisId:'nextjs-stderr'})}).catch(()=>{});
-    // #endregion
 
     console.error(`❌ [DEPLOY] Next.js stderr: ${output}`);
   });
@@ -251,9 +227,6 @@ function startNextJs(port) {
     console.error('❌ [DEPLOY] Failed to spawn Next.js process');
     console.error('❌ [DEPLOY] Error:', error.message);
     console.error('❌ [DEPLOY] Error code:', error.code);
-    // #region agent log
-    fetch('http://127.0.0.1:7262/ingest/60585c9d-40fa-40a1-b59b-bcde38dab411',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'scripts/start-with-logs.js:201',message:'Next.js spawn error',data:{error:error.message,code:error.code},timestamp:Date.now(),sessionId:'deploy-debug',runId:'start',hypothesisId:'spawn-error'})}).catch(()=>{});
-    // #endregion
     if (error.message.includes('EADDRINUSE')) {
       console.error(`❌ [DEPLOY] Port ${port} is still in use`);
       console.error(`❌ [DEPLOY] Run: node scripts/kill-port.js`);
@@ -268,9 +241,6 @@ function startNextJs(port) {
     console.log(`📋 [DEPLOY] Exit code: ${code}`);
     console.log(`📋 [DEPLOY] Signal: ${signal || 'none'}`);
     console.log(`📋 [DEPLOY] Server was started: ${serverStarted}`);
-    // #region agent log
-    fetch('http://127.0.0.1:7262/ingest/60585c9d-40fa-40a1-b59b-bcde38dab411',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'scripts/start-with-logs.js:229',message:'Next.js process exited',data:{code,signal,serverStarted},timestamp:Date.now(),sessionId:'deploy-debug',runId:'start',hypothesisId:'process-exit'})}).catch(()=>{});
-    // #endregion
     if (code !== 0 && code !== null) {
       console.error(`❌ [DEPLOY] Next.js process exited with non-zero code ${code}`);
       if (!serverStarted) {

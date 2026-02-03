@@ -90,29 +90,12 @@ export async function getCustomerById(id: string, userId: string) {
 }
 
 export async function createCustomer(data: CreateCustomerData) {
-  // #region agent log
-  fetch('http://127.0.0.1:7243/ingest/e77c6a33-0990-4e85-b79e-b1f96db37185',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'lib/services/customer.service.ts:92',message:'createCustomer entry',data:{firstName:data.firstName,lastName:data.lastName,hasUserId:!!data.userId,userId:data.userId,phone:data.phone,email:data.email,hasFavoriteProducts:!!data.favoriteProducts,hasPreferences:!!data.preferences},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'C'})}).catch(()=>{});
-  // #endregion
-  
-  // #region agent log
-  fetch('http://127.0.0.1:7243/ingest/e77c6a33-0990-4e85-b79e-b1f96db37185',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'lib/services/customer.service.ts:95',message:'Before prisma.customer.create',data:{dataKeys:Object.keys(data),dataValues:{firstName:data.firstName,lastName:data.lastName,userId:data.userId}},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'E'})}).catch(()=>{});
-  // #endregion
-  
   try {
     const result = await prisma.customer.create({
       data,
     });
-    
-    // #region agent log
-    fetch('http://127.0.0.1:7243/ingest/e77c6a33-0990-4e85-b79e-b1f96db37185',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'lib/services/customer.service.ts:102',message:'prisma.customer.create success',data:{customerId:result.id},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
-    // #endregion
-    
     return result;
   } catch (prismaError) {
-    // #region agent log
-    fetch('http://127.0.0.1:7243/ingest/e77c6a33-0990-4e85-b79e-b1f96db37185',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'lib/services/customer.service.ts:107',message:'prisma.customer.create error',data:{errorMessage:prismaError instanceof Error ? prismaError.message : String(prismaError),errorName:prismaError instanceof Error ? prismaError.name : 'Unknown',prismaCode:(prismaError as any)?.code,prismaMeta:(prismaError as any)?.meta},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'D'})}).catch(()=>{});
-    // #endregion
-    
     throw prismaError;
   }
 }
