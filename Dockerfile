@@ -11,6 +11,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 FROM base AS deps
 
 COPY package.json package-lock.json ./
+COPY scripts ./scripts
 RUN npm ci
 
 FROM base AS builder
