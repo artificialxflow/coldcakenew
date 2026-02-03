@@ -24,6 +24,14 @@ export function middleware(req: NextRequest) {
   try {
     const { pathname } = req.nextUrl;
 
+    // #region agent log
+    if (pathname.startsWith("/_next/static")) {
+      const payload = {location:'middleware.ts:static-request',message:'_next/static request reached app',data:{pathname,url:req.url},timestamp:Date.now(),sessionId:'debug-session',runId:'chunk-debug',hypothesisId:'H1-H2'};
+      fetch('http://127.0.0.1:7250/ingest/3d31f3d8-274e-4275-a595-383f8a58a75d',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)}).catch(()=>{});
+      console.warn('[DEBUG] _next/static request reached app:', pathname);
+    }
+    // #endregion
+
     for (const [oldPath, newPath] of OLD_PANEL_PATHS) {
       if (pathname === oldPath || pathname.startsWith(oldPath + "/")) {
         const url = req.nextUrl.clone();
@@ -59,6 +67,7 @@ export function middleware(req: NextRequest) {
 
 export const config = {
   matcher: [
+    "/_next/static/:path*",
     "/dashboard",
     "/dashboard/:path*",
     "/products",
