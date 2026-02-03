@@ -228,6 +228,13 @@ node scripts/health-check.js
 
 اگر از **Coolify** و اتصال به **Git** استفاده می‌کنید، پروژه با **Nixpacks** بیلد می‌شود (بدون Dockerfile دستی).
 
+### نکته مهم درباره Domains
+
+در Coolify این فیلد معمولاً برای ساختن متغیرهای `COOLIFY_URL` و `COOLIFY_FQDN` استفاده می‌شود و **فقط یک مقدار** را درست پشتیبانی می‌کند.
+
+- **چند مقدار با فاصله/کاما نگذارید** (مثل `coldcake.ir 188.245.233.71`)
+- این کار باعث می‌شود دستور `nixpacks plan` با خطای `Found argument ... which wasn't expected` شکست بخورد.
+
 ### فایل `nixpacks.toml`
 
 در ریشهٔ پروژه فایل `nixpacks.toml` وجود دارد که:
