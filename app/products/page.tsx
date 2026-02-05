@@ -410,6 +410,8 @@ export default function ProductsPage(props?: { noLayout?: boolean }) {
           setFormData={setFormData}
           categories={categories}
           isSaving={isSaving}
+          isUploading={isUploading}
+          onUpload={handleImageUpload}
           onSave={handleAddProduct}
           onCancel={() => {
             setShowAddModal(false);
@@ -433,6 +435,8 @@ export default function ProductsPage(props?: { noLayout?: boolean }) {
           setFormData={setFormData}
           categories={categories}
           isSaving={isSaving}
+          isUploading={isUploading}
+          onUpload={handleImageUpload}
           onSave={handleEditProduct}
           onCancel={() => {
             setShowEditModal(false);
@@ -493,6 +497,8 @@ function ProductForm({
   setFormData,
   categories,
   isSaving,
+  isUploading,
+  onUpload,
   onSave,
   onCancel,
 }: {
@@ -500,6 +506,8 @@ function ProductForm({
   setFormData: (data: any) => void;
   categories: string[];
   isSaving: boolean;
+  isUploading: boolean;
+  onUpload: (files: FileList | null) => void;
   onSave: () => void;
   onCancel: () => void;
 }) {
@@ -618,7 +626,7 @@ function ProductForm({
             type="file"
             accept="image/*"
             multiple
-            onChange={(e) => handleImageUpload(e.target.files)}
+            onChange={(e) => onUpload(e.target.files)}
             disabled={isUploading}
             className="text-sm"
           />
