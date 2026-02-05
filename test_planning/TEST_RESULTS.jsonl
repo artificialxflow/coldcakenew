@@ -1,0 +1,27 @@
+{"phaseId":"2","phaseName":"Product & Inventory","status":"failed","exitCode":null,"script":"scripts/test-phase-2.ts","startedAt":"2026-02-05T10:14:21.751Z","finishedAt":"2026-02-05T10:14:21.774Z"}
+{"phaseId":"2","phaseName":"Product & Inventory","status":"failed","exitCode":null,"script":"scripts/test-phase-2.ts","startedAt":"2026-02-05T10:19:21.727Z","finishedAt":"2026-02-05T10:19:21.750Z"}
+{"phaseId":"2","phaseName":"Product & Inventory","status":"failed","exitCode":null,"script":"scripts/test-phase-2.ts","startedAt":"2026-02-05T10:21:14.473Z","finishedAt":"2026-02-05T10:21:14.585Z"}
+{"phaseId":"2","phaseName":"Product & Inventory","status":"failed","exitCode":1,"script":"scripts/test-phase-2.ts","startedAt":"2026-02-05T10:22:45.535Z","finishedAt":"2026-02-05T10:22:49.949Z"}
+{"phaseId":"2","phaseName":"Product & Inventory","status":"failed","exitCode":1,"script":"scripts/test-phase-2.ts","startedAt":"2026-02-05T10:25:42.121Z","finishedAt":"2026-02-05T10:25:47.310Z"}
+{"phaseId":"2","phaseName":"Product & Inventory","status":"passed","exitCode":0,"script":"scripts/test-phase-2.ts","startedAt":"2026-02-05T10:27:20.459Z","finishedAt":"2026-02-05T10:27:25.020Z"}
+{"phaseId":"3","phaseName":"Sales & Orders","status":"failed","exitCode":1,"script":"scripts/test-phase-3.ts","startedAt":"2026-02-05T10:27:25.024Z","finishedAt":"2026-02-05T10:27:33.903Z"}
+{"phaseId":"2","phaseName":"Product & Inventory","status":"passed","exitCode":0,"script":"scripts/test-phase-2.ts","startedAt":"2026-02-05T10:29:22.763Z","finishedAt":"2026-02-05T10:29:29.410Z"}
+{"phaseId":"3","phaseName":"Sales & Orders","status":"failed","exitCode":1,"script":"scripts/test-phase-3.ts","startedAt":"2026-02-05T10:29:29.415Z","finishedAt":"2026-02-05T10:29:39.109Z"}
+{"phaseId":"2","phaseName":"Product & Inventory","status":"passed","exitCode":0,"script":"scripts/test-phase-2.ts","startedAt":"2026-02-05T10:30:07.712Z","finishedAt":"2026-02-05T10:30:11.158Z"}
+{"phaseId":"3","phaseName":"Sales & Orders","status":"failed","exitCode":1,"script":"scripts/test-phase-3.ts","startedAt":"2026-02-05T10:30:11.165Z","finishedAt":"2026-02-05T10:30:16.878Z"}
+{"phaseId":"2","phaseName":"Product & Inventory","status":"passed","exitCode":0,"script":"scripts/test-phase-2.ts","startedAt":"2026-02-05T10:31:45.501Z","finishedAt":"2026-02-05T10:31:50.348Z"}
+{"phaseId":"3","phaseName":"Sales & Orders","status":"failed","exitCode":1,"script":"scripts/test-phase-3.ts","startedAt":"2026-02-05T10:31:50.351Z","finishedAt":"2026-02-05T10:31:57.981Z"}
+{"phaseId":"2","phaseName":"Product & Inventory","status":"passed","exitCode":0,"script":"scripts/test-phase-2.ts","startedAt":"2026-02-05T10:33:24.795Z","finishedAt":"2026-02-05T10:33:28.865Z"}
+{"phaseId":"3","phaseName":"Sales & Orders","status":"failed","exitCode":1,"script":"scripts/test-phase-3.ts","startedAt":"2026-02-05T10:33:28.871Z","finishedAt":"2026-02-05T10:33:36.045Z"}
+{"phaseId":"2","phaseName":"Product & Inventory","status":"passed","exitCode":0,"script":"scripts/test-phase-2.ts","startedAt":"2026-02-05T10:34:59.880Z","finishedAt":"2026-02-05T10:35:05.891Z"}
+{"phaseId":"3","phaseName":"Sales & Orders","status":"failed","exitCode":1,"script":"scripts/test-phase-3.ts","startedAt":"2026-02-05T10:35:05.895Z","finishedAt":"2026-02-05T10:35:13.894Z"}
+{"phaseId":"2","phaseName":"Product & Inventory","status":"passed","exitCode":0,"script":"scripts/test-phase-2.ts","startedAt":"2026-02-05T10:36:48.172Z","finishedAt":"2026-02-05T10:36:53.884Z"}
+{"phaseId":"3","phaseName":"Sales & Orders","status":"failed","exitCode":1,"script":"scripts/test-phase-3.ts","startedAt":"2026-02-05T10:36:53.888Z","finishedAt":"2026-02-05T10:37:01.904Z"}
+{"phaseId":"2","phaseName":"Product & Inventory","status":"passed","exitCode":0,"script":"scripts/test-phase-2.ts","startedAt":"2026-02-05T10:38:20.143Z","finishedAt":"2026-02-05T10:38:27.310Z"}
+{"phaseId":"3","phaseName":"Sales & Orders","status":"failed","exitCode":1,"script":"scripts/test-phase-3.ts","startedAt":"2026-02-05T10:38:27.328Z","finishedAt":"2026-02-05T10:38:36.782Z"}
+{"phaseId":"2","phaseName":"Product & Inventory","status":"passed","exitCode":0,"script":"scripts/test-phase-2.ts","startedAt":"2026-02-05T10:40:21.416Z","finishedAt":"2026-02-05T10:40:25.843Z"}
+{"phaseId":"3","phaseName":"Sales & Orders","status":"passed","exitCode":0,"script":"scripts/test-phase-3.ts","startedAt":"2026-02-05T10:40:25.853Z","finishedAt":"2026-02-05T10:40:34.114Z"}
+{"phaseId":"4","phaseName":"CRM & Messaging","status":"passed","exitCode":0,"script":"scripts/test-phase-4.ts","startedAt":"2026-02-05T10:40:34.139Z","finishedAt":"2026-02-05T10:40:40.497Z"}
+{"phaseId":"5","phaseName":"Special Features","status":"passed","exitCode":0,"script":"scripts/test-phase-5.ts","startedAt":"2026-02-05T10:40:40.507Z","finishedAt":"2026-02-05T10:40:45.202Z"}
+{"phaseId":"6","phaseName":"Admin & Reports","status":"passed","exitCode":0,"script":"scripts/test-phase-6.ts","startedAt":"2026-02-05T10:40:45.205Z","finishedAt":"2026-02-05T10:40:50.514Z"}
+{"phaseId":"7","phaseName":"E2E & Final","status":"passed","exitCode":0,"script":"scripts/test-phase-7.ts","startedAt":"2026-02-05T10:40:50.516Z","finishedAt":"2026-02-05T10:40:56.473Z"}

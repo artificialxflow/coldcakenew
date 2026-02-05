@@ -16,7 +16,14 @@
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
     "prisma:deploy": "prisma migrate deploy",
-    "prisma:seed": "npx --yes tsx prisma/seed.ts"
+    "prisma:seed": "npx --yes tsx prisma/seed.ts",
+    "test:phase:2": "npx --yes tsx scripts/test-phase-2.ts",
+    "test:phase:3": "npx --yes tsx scripts/test-phase-3.ts",
+    "test:phase:4": "npx --yes tsx scripts/test-phase-4.ts",
+    "test:phase:5": "npx --yes tsx scripts/test-phase-5.ts",
+    "test:phase:6": "npx --yes tsx scripts/test-phase-6.ts",
+    "test:phase:7": "npx --yes tsx scripts/test-phase-7.ts",
+    "test:all": "npx --yes tsx scripts/run-all-tests.ts"
   },
   "prisma": {
     "seed": "npx --yes tsx prisma/seed.ts"
