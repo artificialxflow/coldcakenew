@@ -65,8 +65,8 @@ const mockWorkflows: Workflow[] = [
   },
 ];
 
-export default function WorkflowsPage(props?: { noLayout?: boolean }) {
-  const noLayout = props?.noLayout;
+export default function WorkflowsPage() {
+  const noLayout = false;
   const [workflows, setWorkflows] = useState<Workflow[]>(mockWorkflows);
   const [loading, setLoading] = useState(false);
   const [running, setRunning] = useState<string | null>(null);
