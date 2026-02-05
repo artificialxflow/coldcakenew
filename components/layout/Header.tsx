@@ -1,12 +1,50 @@
 'use client';
 
 import { BellIcon, UserCircleIcon } from '@heroicons/react/24/outline';
+import Link from 'next/link';
+import { useEffect, useMemo, useState } from 'react';
+import { usePathname } from 'next/navigation';
+import { allNavigation } from './navigation';
 
 interface HeaderProps {
   title?: string;
 }
 
 export default function Header({ title = 'کیک سرد' }: HeaderProps) {
+  const pathname = usePathname();
+  const [permissionKeys, setPermissionKeys] = useState<string[] | null>(null);
+
+  useEffect(() => {
+    fetch('/api/auth/me', { credentials: 'include' })
+      .then((res) => (res.ok ? res.json() : { user: null }))
+      .then((data) => {
+        if (data?.user?.permissionKeys) {
+          setPermissionKeys(Array.isArray(data.user.permissionKeys) ? data.user.permissionKeys : []);
+        } else {
+          setPermissionKeys([]);
+        }
+      })
+      .catch(() => setPermissionKeys([]));
+  }, []);
+
+  const topNavHrefs = useMemo(
+    () => new Set([
+      '/admin/dashboard',
+      '/admin/products',
+      '/admin/messages',
+      '/admin/settings',
+      '/admin/blog-admin',
+    ]),
+    []
+  );
+
+  const topNavigation = useMemo(() => {
+    const base = allNavigation.filter((item) => topNavHrefs.has(item.href));
+    if (permissionKeys === null) return base;
+    if (permissionKeys.includes('*')) return base;
+    return base.filter((item) => !item.permission || permissionKeys.includes(item.permission));
+  }, [permissionKeys, topNavHrefs]);
+
   return (
     <header className="no-print bg-white border-b border-gray-200 shadow-sm sticky top-0 z-30">
       <div className="flex items-center justify-between px-4 lg:px-6 h-16">
@@ -38,6 +76,28 @@ export default function Header({ title = 'کیک سرد' }: HeaderProps) {
           </button>
         </div>
       </div>
+      <nav className="border-t border-gray-100">
+        <div className="px-4 lg:px-6 py-2 overflow-x-auto">
+          <div className="flex items-center gap-2 min-w-max">
+            {topNavigation.map((item) => {
+              const isActive = pathname === item.href;
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className={`px-3 py-1.5 rounded-full text-sm whitespace-nowrap transition-colors ${
+                    isActive
+                      ? 'bg-yellow-100 text-yellow-700 font-semibold'
+                      : 'text-gray-700 hover:bg-gray-100'
+                  }`}
+                >
+                  {item.name}
+                </Link>
+              );
+            })}
+          </div>
+        </div>
+      </nav>
     </header>
   );
 }
