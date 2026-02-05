@@ -7,8 +7,8 @@ import { Card, CardHeader, CardTitle, CardContent, Button, LoadingSpinner, useTo
 import { BlogPost } from '@/types';
 import { PlusIcon, PencilIcon, TrashIcon } from '@heroicons/react/24/outline';
 
-export default function BlogAdminPage(props?: { noLayout?: boolean }) {
-  const noLayout = props?.noLayout;
+export default function BlogAdminPage() {
+  const noLayout = false;
   const { showToast, ToastContainer } = useToast();
   const [posts, setPosts] = useState<BlogPost[]>([]);
   const [loading, setLoading] = useState(true);
