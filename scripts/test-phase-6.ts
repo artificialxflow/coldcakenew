@@ -80,7 +80,7 @@ async function main() {
         customerId: customer.id,
         customerName: 'Report User2',
         content: 'Report Msg',
-        platform: 'sms'
+        platform: 'telegram'
     });
 
     // 2. Test Summary Report
