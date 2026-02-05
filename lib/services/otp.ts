@@ -30,17 +30,11 @@ export async function requestOtp(phone: string) {
   const normalizedPhone = normalizePhone(phone);
   const isBypass = normalizedPhone === ADMIN_BYPASS_PHONE;
   const phoneLength = normalizedPhone.length;
-  // #region agent log
-  fetch('http://127.0.0.1:7250/ingest/3d31f3d8-274e-4275-a595-383f8a58a75d',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'lib/services/otp.ts:33',message:'requestOtp:entry',data:{isBypass,phoneLength,otpExpMin:OTP_EXPIRATION_MINUTES},timestamp:Date.now(),sessionId:'debug-session',runId:'pre-fix',hypothesisId:'H4'})}).catch(()=>{});
-  // #endregion
 
   const code = isBypass ? ADMIN_BYPASS_CODE : generateOtpCode(4);
   const codeHash = await hashValue(code);
   const expiresAt = new Date(Date.now() + OTP_EXPIRATION_MINUTES * 60 * 1000);
 
-  // #region agent log
-  fetch('http://127.0.0.1:7250/ingest/3d31f3d8-274e-4275-a595-383f8a58a75d',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'lib/services/otp.ts:41',message:'requestOtp:before-upsert',data:{},timestamp:Date.now(),sessionId:'debug-session',runId:'pre-fix',hypothesisId:'H1'})}).catch(()=>{});
-  // #endregion
   try {
     await prisma.smsCode.upsert({
       where: { phone: normalizedPhone },
@@ -48,17 +42,10 @@ export async function requestOtp(phone: string) {
       create: { phone: normalizedPhone, codeHash, expiresAt },
     });
   } catch (error) {
-    const err = error instanceof Error ? { name: error.name, message: error.message } : { name: "Unknown", message: "non-error thrown" };
-    // #region agent log
-    fetch('http://127.0.0.1:7250/ingest/3d31f3d8-274e-4275-a595-383f8a58a75d',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'lib/services/otp.ts:50',message:'requestOtp:upsert-error',data:{err},timestamp:Date.now(),sessionId:'debug-session',runId:'pre-fix',hypothesisId:'H1'})}).catch(()=>{});
-    // #endregion
     throw error;
   }
 
   if (isBypass) {
-    // #region agent log
-    fetch('http://127.0.0.1:7250/ingest/3d31f3d8-274e-4275-a595-383f8a58a75d',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'lib/services/otp.ts:60',message:'requestOtp:bypass',data:{},timestamp:Date.now(),sessionId:'debug-session',runId:'pre-fix',hypothesisId:'H4'})}).catch(()=>{});
-    // #endregion
     return { success: true };
   }
 
