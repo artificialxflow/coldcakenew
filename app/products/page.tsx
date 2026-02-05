@@ -227,17 +227,11 @@ export default function ProductsPage(props?: { noLayout?: boolean }) {
   };
 
   const handleImageUpload = async (files: FileList | null) => {
-    // #region agent log
-    fetch('http://127.0.0.1:7250/ingest/3d31f3d8-274e-4275-a595-383f8a58a75d',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'app/products/page.tsx:258',message:'handleImageUpload start',data:{filesCount:files?.length ?? 0},timestamp:Date.now(),sessionId:'debug-session',runId:'post-fix',hypothesisId:'H2'})}).catch(()=>{});
-    // #endregion
     if (!files || files.length === 0) return;
     setIsUploading(true);
     try {
       const uploadedUrls: string[] = [];
       for (const file of Array.from(files)) {
-        // #region agent log
-        fetch('http://127.0.0.1:7250/ingest/3d31f3d8-274e-4275-a595-383f8a58a75d',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'app/products/page.tsx:266',message:'Uploading file',data:{size:file.size,type:file.type},timestamp:Date.now(),sessionId:'debug-session',runId:'post-fix',hypothesisId:'H2'})}).catch(()=>{});
-        // #endregion
         const formData = new FormData();
         formData.append('file', file);
         const res = await fetch('/api/upload', {
@@ -251,15 +245,9 @@ export default function ProductsPage(props?: { noLayout?: boolean }) {
       }
       if (uploadedUrls.length > 0) {
         setFormData((prev) => ({ ...prev, images: [...prev.images, ...uploadedUrls] }));
-        // #region agent log
-        fetch('http://127.0.0.1:7250/ingest/3d31f3d8-274e-4275-a595-383f8a58a75d',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'app/products/page.tsx:279',message:'Upload complete',data:{addedCount:uploadedUrls.length,totalImages:formData.images.length + uploadedUrls.length},timestamp:Date.now(),sessionId:'debug-session',runId:'post-fix',hypothesisId:'H2'})}).catch(()=>{});
-        // #endregion
         showToast('تصاویر با موفقیت آپلود شدند', 'success');
       }
     } catch (error) {
-      // #region agent log
-      fetch('http://127.0.0.1:7250/ingest/3d31f3d8-274e-4275-a595-383f8a58a75d',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'app/products/page.tsx:286',message:'Upload error',data:{error: error instanceof Error ? error.message : 'unknown'},timestamp:Date.now(),sessionId:'debug-session',runId:'post-fix',hypothesisId:'H2'})}).catch(()=>{});
-      // #endregion
       showToast(error instanceof Error ? error.message : 'خطا در آپلود تصویر', 'error');
     } finally {
       setIsUploading(false);
