@@ -85,29 +85,49 @@ async function main() {
 
   // ادمین با یوزر/پسورد
   const adminPasswordHash = await bcrypt.hash('admin123', 10);
-  const adminUser = await prisma.user.upsert({
-    where: { username: 'admin' },
-    create: {
-      username: 'admin',
-      email: 'admin@coldcake.ir',
-      passwordHash: adminPasswordHash,
-      roleId: adminRole.id,
-    },
-    update: { passwordHash: adminPasswordHash, roleId: adminRole.id },
-  });
+  // #region agent log
+  fetch('http://127.0.0.1:7250/ingest/3d31f3d8-274e-4275-a595-383f8a58a75d',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'prisma/seed.ts:90',message:'seed:admin-user:lookup',data:{username:'admin'},timestamp:Date.now(),sessionId:'debug-session',runId:'seed-debug',hypothesisId:'H1'})}).catch(()=>{});
+  // #endregion
+  const existingAdmin = await prisma.user.findFirst({ where: { username: 'admin' } });
+  const adminUser = existingAdmin
+    ? await prisma.user.update({
+        where: { id: existingAdmin.id },
+        data: { passwordHash: adminPasswordHash, roleId: adminRole.id },
+      })
+    : await prisma.user.create({
+        data: {
+          username: 'admin',
+          email: 'admin@coldcake.ir',
+          passwordHash: adminPasswordHash,
+          roleId: adminRole.id,
+        },
+      });
+  // #region agent log
+  fetch('http://127.0.0.1:7250/ingest/3d31f3d8-274e-4275-a595-383f8a58a75d',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'prisma/seed.ts:108',message:'seed:admin-user:result',data:{action:existingAdmin?'update':'create',userId:adminUser.id},timestamp:Date.now(),sessionId:'debug-session',runId:'seed-debug',hypothesisId:'H1'})}).catch(()=>{});
+  // #endregion
   console.log('✅ کاربر ادمین (admin / admin123) ایجاد شد');
 
   const accountantPasswordHash = await bcrypt.hash('acc123', 10);
-  await prisma.user.upsert({
-    where: { username: 'accountant' },
-    create: {
-      username: 'accountant',
-      email: 'accountant@coldcake.ir',
-      passwordHash: accountantPasswordHash,
-      roleId: accountantRole.id,
-    },
-    update: { passwordHash: accountantPasswordHash, roleId: accountantRole.id },
-  });
+  // #region agent log
+  fetch('http://127.0.0.1:7250/ingest/3d31f3d8-274e-4275-a595-383f8a58a75d',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'prisma/seed.ts:116',message:'seed:accountant-user:lookup',data:{username:'accountant'},timestamp:Date.now(),sessionId:'debug-session',runId:'seed-debug',hypothesisId:'H1'})}).catch(()=>{});
+  // #endregion
+  const existingAccountant = await prisma.user.findFirst({ where: { username: 'accountant' } });
+  const accountantUser = existingAccountant
+    ? await prisma.user.update({
+        where: { id: existingAccountant.id },
+        data: { passwordHash: accountantPasswordHash, roleId: accountantRole.id },
+      })
+    : await prisma.user.create({
+        data: {
+          username: 'accountant',
+          email: 'accountant@coldcake.ir',
+          passwordHash: accountantPasswordHash,
+          roleId: accountantRole.id,
+        },
+      });
+  // #region agent log
+  fetch('http://127.0.0.1:7250/ingest/3d31f3d8-274e-4275-a595-383f8a58a75d',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'prisma/seed.ts:134',message:'seed:accountant-user:result',data:{action:existingAccountant?'update':'create',userId:accountantUser.id},timestamp:Date.now(),sessionId:'debug-session',runId:'seed-debug',hypothesisId:'H1'})}).catch(()=>{});
+  // #endregion
   console.log('✅ کاربر حسابدار (accountant / acc123) ایجاد شد');
 
   // حذف داده‌های قبلی (اختیاری - برای seeding مجدد)
