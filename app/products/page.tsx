@@ -23,6 +23,7 @@ export default function ProductsPage(props?: { noLayout?: boolean }) {
   const [productToDelete, setProductToDelete] = useState<Product | null>(null);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [isSaving, setIsSaving] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
     color: '',
@@ -223,6 +224,34 @@ export default function ProductsPage(props?: { noLayout?: boolean }) {
       seoTitle: '',
       seoDescription: '',
     });
+  };
+
+  const handleImageUpload = async (files: FileList | null) => {
+    if (!files || files.length === 0) return;
+    setIsUploading(true);
+    try {
+      const uploadedUrls: string[] = [];
+      for (const file of Array.from(files)) {
+        const formData = new FormData();
+        formData.append('file', file);
+        const res = await fetch('/api/upload', {
+          method: 'POST',
+          body: formData,
+          credentials: 'include',
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data?.error || 'خطا در آپلود تصویر');
+        if (data?.url) uploadedUrls.push(data.url);
+      }
+      if (uploadedUrls.length > 0) {
+        setFormData((prev) => ({ ...prev, images: [...prev.images, ...uploadedUrls] }));
+        showToast('تصاویر با موفقیت آپلود شدند', 'success');
+      }
+    } catch (error) {
+      showToast(error instanceof Error ? error.message : 'خطا در آپلود تصویر', 'error');
+    } finally {
+      setIsUploading(false);
+    }
   };
 
   const openEditModal = (product: Product) => {
@@ -584,6 +613,38 @@ function ProductForm({
           onChange={(e) => setFormData({ ...formData, images: e.target.value.split('\n').filter(url => url.trim()) })}
           placeholder="https://example.com/image1.jpg&#10;https://example.com/image2.jpg"
         />
+        <div className="mt-3 flex items-center gap-3">
+          <input
+            type="file"
+            accept="image/*"
+            multiple
+            onChange={(e) => handleImageUpload(e.target.files)}
+            disabled={isUploading}
+            className="text-sm"
+          />
+          {isUploading && <span className="text-sm text-gray-500">در حال آپلود...</span>}
+        </div>
+        {formData.images.length > 0 && (
+          <div className="mt-3 space-y-2">
+            {formData.images.map((url, idx) => (
+              <div key={`${url}-${idx}`} className="flex items-center justify-between gap-2 text-sm">
+                <span className="truncate text-gray-600">{url}</span>
+                <button
+                  type="button"
+                  onClick={() =>
+                    setFormData({
+                      ...formData,
+                      images: formData.images.filter((_, i) => i !== idx),
+                    })
+                  }
+                  className="text-red-600 hover:text-red-700"
+                >
+                  حذف
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
       <div className="flex items-center gap-2">
         <input
