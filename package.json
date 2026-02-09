@@ -18,6 +18,7 @@
     "prisma:deploy": "prisma migrate deploy",
     "prisma:seed": "npx --yes tsx prisma/seed.ts",
     "reset:orders-reports": "npx --yes tsx scripts/reset-orders-and-reports.ts",
+    "reset:inventory": "npx --yes tsx scripts/reset-inventory.ts",
     "test:phase:2": "npx --yes tsx scripts/test-phase-2.ts",
     "test:phase:3": "npx --yes tsx scripts/test-phase-3.ts",
     "test:phase:4": "npx --yes tsx scripts/test-phase-4.ts",
