@@ -13,7 +13,7 @@ import {
 } from '@heroicons/react/24/outline';
 
 type CategoriesPageProps = { noLayout?: boolean };
-export default function CategoriesPage({ noLayout }: CategoriesPageProps = {}) {
+export default function CategoriesPage({ noLayout }: CategoriesPageProps = {} as CategoriesPageProps) {
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
   const [showAddModal, setShowAddModal] = useState(false);
