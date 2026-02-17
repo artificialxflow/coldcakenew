@@ -12,8 +12,8 @@ import {
   ArrowDownIcon,
 } from '@heroicons/react/24/outline';
 
-export default function CategoriesPage(props: { noLayout?: boolean } = {}) {
-  const noLayout = props.noLayout;
+type CategoriesPageProps = { noLayout?: boolean };
+export default function CategoriesPage({ noLayout }: CategoriesPageProps = {}) {
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
   const [showAddModal, setShowAddModal] = useState(false);
