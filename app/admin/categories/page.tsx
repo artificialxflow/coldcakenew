@@ -12,7 +12,11 @@ import {
   ArrowDownIcon,
 } from '@heroicons/react/24/outline';
 
-type CategoriesPageProps = { noLayout?: boolean };
+type CategoriesPageProps = {
+  params?: Promise<Record<string, string | undefined>>;
+  searchParams?: Promise<Record<string, string | string[] | undefined>>;
+  noLayout?: boolean;
+};
 export default function CategoriesPage(props: CategoriesPageProps) {
   const noLayout = props.noLayout;
   const [categories, setCategories] = useState<Category[]>([]);
