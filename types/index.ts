@@ -25,6 +25,20 @@ export interface Customer {
   manualDebtBalance?: number;
 }
 
+export interface Category {
+  id: string;
+  name: string;
+  slug?: string;
+  description?: string;
+  order: number;
+  active: boolean;
+  createdAt: string;
+  updatedAt: string;
+  _count?: {
+    products: number;
+  };
+}
+
 export interface Product {
   id: string;
   name: string;
@@ -33,6 +47,7 @@ export interface Product {
   discountedPrice?: number;
   finalPrice: number;
   category?: string;
+  categoryId?: string;
   stock?: number;
   priceHistory?: PriceChange[];
   description?: string;

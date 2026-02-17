@@ -1,0 +1,4 @@
+{"location":"debug-db-url.js:env","message":"env check","data":{"envPath":"C:\\Users\\Administrator\\Documents\\projects\\coldcakenew\\.env","fileExists":true},"hypothesisId":"H4","timestamp":1771307860952}
+{"location":"debug-db-url.js:read","message":"env read","data":{"contentLength":1969,"lineCount":49},"hypothesisId":"H4","timestamp":1771307864793}
+{"location":"debug-db-url.js:set","message":"DATABASE_URL set","data":{"valueLength":113},"hypothesisId":"H4","timestamp":1771307864795}
+{"location":"scripts/debug-db-url.js","message":"DATABASE_URL safe parse","data":{"host":"188.245.233.71","port":"5432","database":"postgres","user":"postgres","passwordLength":64,"hasSearchParams":false,"urlScheme":"postgres:"},"timestamp":1771307864801,"hypothesisId":"H4"}

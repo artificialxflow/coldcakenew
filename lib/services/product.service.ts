@@ -7,6 +7,7 @@ export interface CreateProductData {
   discountedPrice?: number;
   finalPrice: number;
   category?: string;
+  categoryId?: string;
   stock?: number;
   description?: string;
   images?: string[];
@@ -24,6 +25,7 @@ export interface UpdateProductData {
   discountedPrice?: number;
   finalPrice?: number;
   category?: string;
+  categoryId?: string;
   stock?: number;
   description?: string;
   images?: string[];
@@ -37,6 +39,7 @@ export interface UpdateProductData {
 export async function getProducts(filters?: {
   search?: string;
   category?: string;
+  categoryId?: string;
 }) {
   const where: any = {};
 
@@ -47,7 +50,9 @@ export async function getProducts(filters?: {
     ];
   }
 
-  if (filters?.category) {
+  if (filters?.categoryId) {
+    where.categoryId = filters.categoryId;
+  } else if (filters?.category) {
     where.category = filters.category;
   }
 
@@ -56,6 +61,7 @@ export async function getProducts(filters?: {
     include: {
       saleItems: true,
       inventoryItems: true,
+      categoryRelation: true,
     },
     orderBy: { createdAt: 'desc' },
   });
@@ -94,9 +100,22 @@ export async function createProduct(data: CreateProductData) {
     }
   }
 
+  // If categoryId is provided, get category name
+  let category = data.category;
+  if (data.categoryId && !category) {
+    const categoryRecord = await prisma.category.findUnique({
+      where: { id: data.categoryId },
+    });
+    if (categoryRecord) {
+      category = categoryRecord.name;
+    }
+  }
+
   return prisma.product.create({
     data: {
       ...data,
+      category,
+      categoryId: data.categoryId || undefined,
       slug,
       priceType: data.priceType || 'fixed',
     },

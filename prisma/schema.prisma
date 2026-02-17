@@ -129,6 +129,24 @@ model Customer {
   @@index([lastPurchaseDate])
 }
 
+model Category {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  slug        String?  @unique
+  description String?
+  order       Int      @default(0)
+  active      Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  products    Product[]
+
+  @@index([name])
+  @@index([slug])
+  @@index([active])
+  @@index([order])
+}
+
 model Product {
   id              String        @id @default(cuid())
   name            String
@@ -137,6 +155,7 @@ model Product {
   discountedPrice Float?
   finalPrice      Float
   category        String?
+  categoryId      String?
   stock           Int           @default(0)
   description     String?       @db.Text
   images          String[]      @default([])
@@ -146,6 +165,7 @@ model Product {
   seoTitle        String?
   seoDescription  String?       @db.Text
 
+  categoryRelation Category?    @relation(fields: [categoryId], references: [id], onDelete: SetNull)
   saleItems       SaleItem[]
   inventoryItems  Inventory[]
   purchases       Purchase[]
@@ -158,6 +178,7 @@ model Product {
   updatedAt DateTime @updatedAt
 
   @@index([category])
+  @@index([categoryId])
   @@index([name])
   @@index([slug])
   @@index([featured])

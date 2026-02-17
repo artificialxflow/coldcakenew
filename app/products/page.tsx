@@ -3,7 +3,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import { Card, CardHeader, CardTitle, CardContent, Button, Input, Modal, useToast, LoadingSpinner, EmptyState } from '@/components/ui';
-import { Product } from '@/types';
+import { Product, Category } from '@/types';
 import { 
   PlusIcon,
   PencilIcon,
@@ -14,6 +14,7 @@ import {
 export default function ProductsPage(props?: { noLayout?: boolean }) {
   const noLayout = props?.noLayout;
   const [products, setProducts] = useState<Product[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('');
@@ -27,7 +28,7 @@ export default function ProductsPage(props?: { noLayout?: boolean }) {
   const [formData, setFormData] = useState({
     name: '',
     color: '',
-    category: '',
+    categoryId: '',
     originalPrice: '',
     discountedPrice: '',
     finalPrice: '',
@@ -41,11 +42,23 @@ export default function ProductsPage(props?: { noLayout?: boolean }) {
   });
   const { showToast, ToastContainer } = useToast();
 
-  const categories = ['سیسمونی', 'رختخواب', 'اسباب‌بازی', 'لوازم بهداشتی', 'کالسکه و کریر', 'لوازم تغذیه', 'لباس', 'دیگر'];
-
   useEffect(() => {
+    loadCategories();
     loadProducts();
   }, []);
+
+  const loadCategories = async () => {
+    try {
+      const res = await fetch('/api/admin/categories?includeInactive=false', {
+        credentials: 'include',
+      });
+      if (res.ok) {
+        setCategories(await res.json());
+      }
+    } catch (error) {
+      console.error('Error loading categories:', error);
+    }
+  };
 
   const loadProducts = async () => {
     try {
@@ -152,7 +165,7 @@ export default function ProductsPage(props?: { noLayout?: boolean }) {
         body: JSON.stringify({
           name: formData.name,
           color: formData.color || undefined,
-          category: formData.category || undefined,
+          categoryId: formData.categoryId || undefined,
           originalPrice: formData.priceType === 'fixed' ? Number(formData.originalPrice) : 0,
           discountedPrice: formData.discountedPrice ? Number(formData.discountedPrice) : undefined,
           finalPrice: formData.priceType === 'fixed' ? Number(formData.finalPrice) : 0,
@@ -212,7 +225,7 @@ export default function ProductsPage(props?: { noLayout?: boolean }) {
     setFormData({
       name: '',
       color: '',
-      category: '',
+      categoryId: '',
       originalPrice: '',
       discountedPrice: '',
       finalPrice: '',
@@ -256,10 +269,18 @@ export default function ProductsPage(props?: { noLayout?: boolean }) {
 
   const openEditModal = (product: Product) => {
     setEditingProduct(product);
+    // Find categoryId from categories list if product only has category string
+    let categoryId = product.categoryId || '';
+    if (!categoryId && product.category) {
+      const foundCategory = categories.find((cat) => cat.name === product.category);
+      if (foundCategory) {
+        categoryId = foundCategory.id;
+      }
+    }
     setFormData({
       name: product.name || '',
       color: product.color || '',
-      category: product.category || '',
+      categoryId: categoryId,
       originalPrice: String(product.originalPrice || 0),
       discountedPrice: product.discountedPrice ? String(product.discountedPrice) : '',
       finalPrice: String(product.finalPrice || 0),
@@ -313,8 +334,8 @@ export default function ProductsPage(props?: { noLayout?: boolean }) {
                 >
                   <option value="">همه دسته‌بندی‌ها</option>
                   {categories.map((cat) => (
-                    <option key={cat} value={cat}>
-                      {cat}
+                    <option key={cat.id} value={cat.name}>
+                      {cat.name}
                     </option>
                   ))}
                 </select>
@@ -504,7 +525,7 @@ function ProductForm({
 }: {
   formData: any;
   setFormData: (data: any) => void;
-  categories: string[];
+  categories: Category[];
   isSaving: boolean;
   isUploading: boolean;
   onUpload: (files: FileList | null) => void;
@@ -526,13 +547,13 @@ function ProductForm({
           <label className="block text-sm font-medium mb-2">دسته‌بندی</label>
           <select
             className="w-full border rounded-lg p-2"
-            value={formData.category}
-            onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+            value={formData.categoryId}
+            onChange={(e) => setFormData({ ...formData, categoryId: e.target.value })}
           >
             <option value="">-- انتخاب کنید --</option>
             {categories.map((cat) => (
-              <option key={cat} value={cat}>
-                {cat}
+              <option key={cat.id} value={cat.id}>
+                {cat.name}
               </option>
             ))}
           </select>

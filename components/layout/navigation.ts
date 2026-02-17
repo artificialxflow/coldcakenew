@@ -10,6 +10,7 @@ import {
   UserGroupIcon,
   ShoppingCartIcon,
   BookOpenIcon,
+  TagIcon,
 } from '@heroicons/react/24/outline';
 
 export interface NavItem {
@@ -24,6 +25,7 @@ export const allNavigation: NavItem[] = [
   { name: 'داشبورد', href: '/admin/dashboard', icon: HomeIcon, emoji: '📊', permission: 'reports.read' },
   { name: 'ارتباط با مشتری', href: '/admin/messages', icon: ChatBubbleLeftRightIcon, emoji: '💬', permission: 'reports.read' },
   { name: 'مدیریت محصولات', href: '/admin/products', icon: CubeIcon, emoji: '📦', permission: 'products.read' },
+  { name: 'مدیریت دسته‌بندی‌ها', href: '/admin/categories', icon: TagIcon, emoji: '🏷️', permission: 'products.write' },
   { name: 'مدیریت قیمت', href: '/admin/gold-price', icon: ChartBarIcon, emoji: '💰', permission: 'settings.read' },
   { name: 'گزارش‌های مالی', href: '/admin/reports', icon: DocumentTextIcon, emoji: '📊', permission: 'reports.read' },
   { name: 'سفارشات', href: '/admin/orders', icon: ShoppingCartIcon, emoji: '🛒', permission: 'orders.read' },
