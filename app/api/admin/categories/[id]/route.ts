@@ -4,13 +4,14 @@ import { getCategoryById, updateCategory, deleteCategory } from '@/lib/services/
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const user = await requireAuth(request);
     if (user instanceof NextResponse) return user;
 
-    const category = await getCategoryById(params.id);
+    const { id } = await params;
+    const category = await getCategoryById(id);
     
     if (!category) {
       return NextResponse.json(
@@ -31,12 +32,13 @@ export async function GET(
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const user = await requireAuth(request);
     if (user instanceof NextResponse) return user;
 
+    const { id } = await params;
     const data = await request.json();
 
     if (data.name && !data.name.trim()) {
@@ -46,7 +48,7 @@ export async function PUT(
       );
     }
 
-    const category = await updateCategory(params.id, {
+    const category = await updateCategory(id, {
       name: data.name?.trim(),
       slug: data.slug?.trim(),
       description: data.description?.trim(),
@@ -74,13 +76,14 @@ export async function PUT(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const user = await requireAuth(request);
     if (user instanceof NextResponse) return user;
 
-    await deleteCategory(params.id);
+    const { id } = await params;
+    await deleteCategory(id);
 
     return NextResponse.json({ success: true });
   } catch (error) {

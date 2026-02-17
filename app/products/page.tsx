@@ -113,7 +113,7 @@ export default function ProductsPage(props?: { noLayout?: boolean }) {
         body: JSON.stringify({
           name: formData.name,
           color: formData.color || undefined,
-          category: formData.category || undefined,
+          categoryId: formData.categoryId || undefined,
           originalPrice: formData.priceType === 'fixed' ? Number(formData.originalPrice) : 0,
           discountedPrice: formData.discountedPrice ? Number(formData.discountedPrice) : undefined,
           finalPrice: formData.priceType === 'fixed' ? Number(formData.finalPrice) : 0,
